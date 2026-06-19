@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RM Sistemas</title>
+<meta name="theme-color" content="#16161a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16161a; --ink-2:#1e1e23; --ink-3:#2b2b32;
+    --grid:rgba(255,255,255,.028);
+    --steel:#83838d; --steel-2:#b6b6bf; --paper:#ededf0;
+    --accent:#aa221f; --accent-2:#d33a33;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Archivo',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--sans); color:var(--paper);
+    background-color:var(--ink);
+    background-image:
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:30px 30px;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+
+  /* ---------- Folha / sheet com marcas de canto ---------- */
+  .sheet{
+    width:100%; max-width:1100px; margin:0 auto; position:relative;
+    padding:26px 28px 70px;
+    padding-top:calc(26px + env(safe-area-inset-top));
+    flex:1; display:flex; flex-direction:column;
+  }
+  .crop{position:absolute;width:14px;height:14px;border:1.5px solid var(--ink-3);pointer-events:none}
+  .crop.tl{top:14px;left:14px;border-right:0;border-bottom:0}
+  .crop.tr{top:14px;right:14px;border-left:0;border-bottom:0}
+  .crop.bl{bottom:14px;left:14px;border-right:0;border-top:0}
+  .crop.br{bottom:14px;right:14px;border-left:0;border-top:0}
+
+  /* ---------- Carimbo de prancha (header) ---------- */
+  .titleblock{
+    display:flex;align-items:stretch;justify-content:space-between;
+    border:1px solid var(--ink-3); background:rgba(30,30,35,.55);
+    backdrop-filter:blur(2px);
+  }
+  .tb-brand{display:flex;align-items:center;gap:14px;padding:16px 20px;border-right:1px solid var(--ink-3)}
+  .mark{
+    width:42px;height:42px;border-radius:9px;background:var(--accent);
+    display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:17px;color:#fff;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset;
+  }
+  .tb-brand h1{font-size:18px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;line-height:1}
+  .tb-brand .sub{font-family:var(--mono);font-size:10px;color:var(--steel);letter-spacing:2px;text-transform:uppercase;margin-top:5px}
+
+  .tb-cells{display:flex}
+  .cell{
+    padding:14px 18px;border-right:1px solid var(--ink-3);min-width:96px;
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+  }
+  .cell:last-child{border-right:0}
+  .cell .lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--steel);text-transform:uppercase}
+  .cell .val{font-family:var(--mono);font-size:13px;color:var(--steel-2);font-weight:500;white-space:nowrap}
+  .cell .val.live{color:var(--paper)}
+
+  /* ---------- Eyebrow ---------- */
+  .eyebrow{
+    display:flex;align-items:center;gap:12px;margin:30px 2px 16px;
+    font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--steel);text-transform:uppercase;
+  }
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--ink-3)}
+  .eyebrow b{color:var(--accent-2);font-weight:700}
+
+  /* ---------- Grid de módulos ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px}
+  .plate{
+    position:relative;background:var(--ink-2);border:1px solid var(--ink-3);
+    padding:18px;cursor:pointer;text-align:left;width:100%;color:inherit;font-family:inherit;
+    display:flex;flex-direction:column;gap:14px;min-height:200px;
+    transition:transform .16s ease,border-color .16s ease,background .16s ease;
+    opacity:0;transform:translateY(10px);animation:rise .5s ease forwards;
+  }
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  .plate::before,.plate::after{
+    content:"";position:absolute;width:13px;height:13px;border:2px solid var(--accent);
+    opacity:0;transition:opacity .16s ease,transform .16s ease;
+  }
+  .plate::before{top:8px;left:8px;border-right:0;border-bottom:0;transform:translate(3px,3px)}
+  .plate::after{bottom:8px;right:8px;border-left:0;border-top:0;transform:translate(-3px,-3px)}
+  .plate:hover{transform:translateY(-3px);border-color:#3a3a42;background:#222228}
+  .plate:hover::before,.plate:hover::after{opacity:1;transform:translate(0,0)}
+  .plate:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  .p-top{display:flex;align-items:center;justify-content:space-between}
+  .p-code{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--steel);text-transform:uppercase}
+  .p-reg{color:var(--ink-3);font-size:14px;line-height:1;transition:color .16s}
+  .plate:hover .p-reg{color:var(--accent)}
+  .glyph{
+    width:50px;height:50px;border:1px solid var(--ink-3);border-radius:8px;background:var(--ink);
+    display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:18px;color:var(--accent-2);
+    transition:border-color .16s;
+  }
+  .plate:hover .glyph{border-color:var(--accent)}
+  .p-name{font-size:16px;font-weight:800;letter-spacing:-.2px}
+  .p-desc{font-size:12.5px;color:var(--steel-2);line-height:1.45;flex:1}
+  .p-foot{
+    font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;color:var(--accent-2);
+    text-transform:uppercase;display:flex;align-items:center;gap:7px;
+  }
+  .p-foot::after{content:"→";transition:transform .15s}
+  .plate:hover .p-foot::after{transform:translateX(4px)}
+
+  footer{
+    margin-top:auto;padding-top:30px;text-align:center;
+    font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--steel);text-transform:uppercase;
+  }
+  footer .rule{height:1px;background:var(--ink-3);margin-bottom:14px}
+
+  @media (max-width:760px){
+    .titleblock{flex-direction:column}
+    .tb-brand{border-right:0;border-bottom:1px solid var(--ink-3)}
+    .tb-cells{overflow-x:auto}
+    .crop{display:none}
+    .sheet{padding:20px 16px 60px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .plate{animation:none;opacity:1;transform:none}
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <span class="crop tl"></span><span class="crop tr"></span>
+    <span class="crop bl"></span><span class="crop br"></span>
+
+    <!-- ===== Carimbo de prancha ===== -->
+    <header class="titleblock">
+      <div class="tb-brand">
+        <div class="mark">RM</div>
+        <div>
+          <h1>RM Sistemas</h1>
+          <div class="sub">Central de Aplicativos</div>
+        </div>
+      </div>
+      <div class="tb-cells">
+        <div class="cell">
+          <span class="lbl">Local</span>
+          <span class="val">Estrela · RS</span>
+        </div>
+        <div class="cell">
+          <span class="lbl">Data</span>
+          <span class="val live" id="tbDate">—</span>
+        </div>
+        <div class="cell">
+          <span class="lbl">Hora</span>
+          <span class="val live" id="tbTime">—</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Eyebrow ===== -->
+    <div class="eyebrow">Sistemas · <b id="modCount">04</b> módulos</div>
+
+    <!-- ===== Módulos ===== -->
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      <div class="rule"></div>
+      RM Estruturas Pré-Fabricadas · Nunes e Kuhn Estruturas Metálicas
+    </footer>
+  </div>
+
+<script>
+/* ============================================================
+   SEUS 4 SISTEMAS — troque o "url" pelo endereço real.
+   ============================================================ */
+const SISTEMAS = [
+  { code:"OR", reg:"SYS · 01", nome:"Orçamento RM",       desc:"Orçamentos e propostas comerciais.",   url:"https://evertonluis4523-afk.github.io/orcamento-rm/" },
+  { code:"PU", reg:"SYS · 02", nome:"Controle de PU",     desc:"Aplicação de poliuretano nas juntas.", url:"https://evertonluis4523-afk.github.io/calculadora-pu/" },
+  { code:"PF", reg:"SYS · 03", nome:"Controle Perfitec",  desc:"Cotação de perfis de aço e telhas.",    url:"https://evertonluis4523-afk.github.io/Pedidos_perfitec/" },
+  { code:"OB", reg:"SYS · 04", nome:"Controle de Obras",  desc:"Painel de acompanhamento de obras.",    url:"https://evertonluis4523-afk.github.io/controle_obras/" },
+  { code:"CH", reg:"SYS · 05", nome:"Controle de Cheques",desc:"Emissão e compensação de cheques.",     url:"https://evertonluis4523-afk.github.io/controle_cheques/" }
+];
+
+const grid = document.getElementById("grid");
+document.getElementById("modCount").textContent = String(SISTEMAS.length).padStart(2,"0");
+
+SISTEMAS.forEach((s,i) => {
+  const el = document.createElement("button");
+  el.className = "plate";
+  el.style.animationDelay = (i*70) + "ms";
+  el.innerHTML =
+    '<div class="p-top"><span class="p-code">'+s.reg+'</span><span class="p-reg">+</span></div>'+
+    '<div class="glyph">'+s.code+'</div>'+
+    '<div class="p-name">'+s.nome+'</div>'+
+    '<div class="p-desc">'+s.desc+'</div>'+
+    '<div class="p-foot">Abrir</div>';
+  el.addEventListener("click", () => {
+    if (!s.url || s.url === "#"){
+      alert('Falta cadastrar o endereco de "'+s.nome+'". Edite o campo url no codigo.');
+      return;
+    }
+    window.open(s.url, "_blank", "noopener");
+  });
+  grid.appendChild(el);
+});
+
+/* Relógio do carimbo */
+function tick(){
+  const d = new Date();
+  const meses = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+  document.getElementById("tbDate").textContent =
+    String(d.getDate()).padStart(2,"0")+" "+meses[d.getMonth()]+" "+d.getFullYear();
+  document.getElementById("tbTime").textContent =
+    String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+tick(); setInterval(tick, 15000);
+
+/* PWA */
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
